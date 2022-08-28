@@ -21,6 +21,7 @@ import java.io.IOError;
 import java.io.IOException;
 import java.nio.ByteBuffer;
 
+import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReadWriteLock;
@@ -280,7 +281,8 @@ public class Scrubber implements Closeable
 
                             outputHandler.warn("Retry failed too. Skipping to next partition (retry's stacktrace follows)", th2);
                             badPartitions++;
-                            seekToNextPartition();
+                            if (!seekToNextPartition())
+                                break;
                         }
                     }
                     else
@@ -290,7 +292,8 @@ public class Scrubber implements Closeable
                         outputHandler.warn("Partition starting at position " + dataStart + " is unreadable; skipping to next");
                         badPartitions++;
                         if (currentIndexKey != null)
-                            seekToNextPartition();
+                            if (!seekToNextPartition())
+                                break;
                     }
                 }
             }
@@ -413,14 +416,14 @@ public class Scrubber implements Closeable
         return indexFile != null && !indexFile.isEOF();
     }
 
-    private void seekToNextPartition()
+    private boolean seekToNextPartition()
     {
         while(nextPartitionPositionFromIndex < dataFile.length())
         {
             try
             {
                 dataFile.seek(nextPartitionPositionFromIndex);
-                return;
+                return true;
             }
             catch (Throwable th)
             {
@@ -431,6 +434,8 @@ public class Scrubber implements Closeable
 
             updateIndexKey();
         }
+
+        return false;
     }
 
     private void saveOutOfOrderPartition(DecoratedKey prevKey, DecoratedKey key, UnfilteredRowIterator iterator)
@@ -512,7 +517,8 @@ public class Scrubber implements Closeable
                                           dataFile.getFilePointer(),
                                           dataFile.length(),
                                           scrubCompactionId,
-                                          ImmutableSet.of(sstable));
+                                          ImmutableSet.of(sstable),
+                                          Paths.get(sstable.getFilename()).getParent().toString());
             }
             catch (Exception e)
             {

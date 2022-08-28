@@ -1355,6 +1355,7 @@ public class CompactionManager implements CompactionManagerMBean
 
             while (ci.hasNext())
             {
+                ci.setTargetDirectory(writer.currentWriter().getFilename());
                 try (UnfilteredRowIterator partition = ci.next();
                      UnfilteredRowIterator notCleaned = cleanupStrategy.cleanup(partition))
                 {
@@ -1709,15 +1710,18 @@ public class CompactionManager implements CompactionManagerMBean
                     if (fullChecker.test(token))
                     {
                         fullWriter.append(partition);
+                        ci.setTargetDirectory(fullWriter.currentWriter().getFilename());
                     }
                     else if (transChecker.test(token))
                     {
                         transWriter.append(partition);
+                        ci.setTargetDirectory(transWriter.currentWriter().getFilename());
                     }
                     else
                     {
                         // otherwise, append it to the unrepaired sstable
                         unrepairedWriter.append(partition);
+                        ci.setTargetDirectory(unrepairedWriter.currentWriter().getFilename());
                     }
                     long bytesScanned = scanners.getTotalBytesScanned();
                     compactionRateLimiterAcquire(limiter, bytesScanned, lastBytesScanned, compressionRatio);
@@ -1752,10 +1756,17 @@ public class CompactionManager implements CompactionManagerMBean
         }
         catch (Throwable e)
         {
-            if (e instanceof CompactionInterruptedException && isCancelled.getAsBoolean())
+            if (e instanceof CompactionInterruptedException)
             {
-                logger.info("Anticompaction has been canceled for session {}", pendingRepair);
-                logger.trace(e.getMessage(), e);
+                if (isCancelled.getAsBoolean())
+                {
+                    logger.info("Anticompaction has been canceled for session {}", pendingRepair);
+                    logger.trace(e.getMessage(), e);
+                }
+                else
+                {
+                    logger.info("Anticompaction for session {} has been stopped by request.", pendingRepair);
+                }
             }
             else
             {

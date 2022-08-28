@@ -15,30 +15,31 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-package org.apache.cassandra.gms;
 
-import java.net.UnknownHostException;
-import java.util.List;
-import java.util.Map;
+package org.apache.cassandra.utils;
 
-public interface GossiperMBean
+import org.junit.Test;
+
+import org.assertj.core.api.Assertions;
+
+public class AssertionUtilsTest
 {
-    public long getEndpointDowntime(String address) throws UnknownHostException;
+    @Test
+    public void isInstanceof()
+    {
+        Assertions.assertThat(new C())
+                  .is(AssertionUtils.isInstanceof(A.class));
 
-    public int getCurrentGenerationNumber(String address) throws UnknownHostException;
+        Assertions.assertThat(new D())
+                  .is(AssertionUtils.isInstanceof(A.class))
+                  .is(AssertionUtils.isInstanceof(B.class));
 
-    public void unsafeAssassinateEndpoint(String address) throws UnknownHostException;
+        Assertions.assertThat(null instanceof A)
+                  .isEqualTo(AssertionUtils.isInstanceof(A.class).matches(null));
+    }
 
-    public void assassinateEndpoint(String address) throws UnknownHostException;
-
-    public List<String> reloadSeeds();
-
-    public List<String> getSeeds();
-
-    /** Returns each node's database release version */
-    public Map<String, List<String>> getReleaseVersionsWithPort();
-
-    public boolean getLooseEmptyEnabled();
-
-    public void setLooseEmptyEnabled(boolean enabled);
+    interface A {}
+    interface B extends A {}
+    static class C implements A {}
+    static class D implements B {}
 }

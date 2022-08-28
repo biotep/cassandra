@@ -1,4 +1,12 @@
 4.2
+ * Remove dependency on Maven Ant Tasks (CASSANDRA-17750)
+ * Update ASM(9.1 to 9.3), Mockito(1.10.10 to 1.12.13) and ByteBuddy(3.2.4 to 4.7.0) (CASSANDRA-17835)
+ * Add the ability for operators to loosen the definition of "empty" for edge cases (CASSANDRA-17842)
+ * Fix potential out of range exception on column index downsampling (CASSANDRA-17839)
+ * Introduce target directory to vtable output for sstable_tasks and for compactionstats (CASSANDRA-13010)
+ * Read/Write/Truncate throw RequestFailure in a race condition with callback timeouts, should return Timeout instead (CASSANDRA-17828)
+ * Add ability to log load profiles at fixed intervals (CASSANDRA-17821)
+ * Protect against Gossip backing up due to a quarantined endpoint without version information (CASSANDRA-17830)
  * NPE in org.apache.cassandra.cql3.Attributes.getTimeToLive (CASSANDRA-17822)
  * Add guardrail for column size (CASSANDRA-17151)
  * When doing a host replacement, we need to check that the node is a live node before failing with "Cannot replace a live node..." (CASSANDRA-17805)
@@ -35,6 +43,7 @@
  * Add guardrail for ALTER TABLE ADD / DROP / REMOVE column operations (CASSANDRA-17495)
  * Rename DisableFlag class to EnableFlag on guardrails (CASSANDRA-17544)
 Merged from 4.1:
+ * Fix BulkLoader to load entireSSTableThrottle and entireSSTableInterDcThrottle (CASSANDRA-17677)
  * Fix a race condition where a keyspace can be oopened while it is being removed (CASSANDRA-17658)
  * DatabaseDescriptor will set the default failure detector during client initialization (CASSANDRA-17782)
  * Avoid initializing schema via SystemKeyspace.getPreferredIP() with the BulkLoader tool (CASSANDRA-17740)
@@ -75,6 +84,8 @@ Merged from 4.1:
  * Revert removal of withBufferSizeInMB(int size) in CQLSSTableWriter.Builder class and deprecate it in favor of withBufferSizeInMiB(int size) (CASSANDRA-17675)
  * Remove expired snapshots of dropped tables after restart (CASSANDRA-17619)
 Merged from 4.0:
+4.0.6
+ * Prevent infinite loop in repair coordinator on FailSession (CASSANDRA-17834)
  * Fix race condition on updating cdc size and advancing to next segment (CASSANDRA-17792)
  * Add 'noboolean' rpm build for older distros like CentOS7 (CASSANDRA-17765)
  * Fix default value for compaction_throughput_mb_per_sec in Config class to match  the one in cassandra.yaml (CASSANDRA-17790)
@@ -85,9 +96,11 @@ Merged from 4.0:
  * Clean up ScheduledExecutors, CommitLog, and MessagingService shutdown for in-JVM dtests (CASSANDRA-17731)
  * Remove extra write to system table for prepared statements (CASSANDRA-17764)
 Merged from 3.11:
+ * Fix potential IndexOutOfBoundsException in PagingState in mixed mode clusters (CASSANDRA-17840)
  * Document usage of closed token intervals in manual compaction (CASSANDRA-17575)
  * Creating of a keyspace on insufficient number of replicas should filter out gosspping-only members (CASSANDRA-17759)
 Merged from 3.0:
+ * Fix scrubber falling into infinite loop when the last partition is broken (CASSANDRA-17862)
  * Improve libjemalloc resolution in bin/cassandra (CASSANDRA-15767)
  * Fix restarting of services on gossipping-only member (CASSANDRA-17752)
 

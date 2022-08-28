@@ -93,6 +93,7 @@ public class Upgrader
              CompactionIterator iter = new CompactionIterator(transaction.opType(), scanners.scanners, controller, nowInSec, nextTimeUUID()))
         {
             writer.switchWriter(createCompactionWriter(sstable.getSSTableMetadata()));
+            iter.setTargetDirectory(writer.currentWriter().getFilename());
             while (iter.hasNext())
                 writer.append(iter.next());
 
